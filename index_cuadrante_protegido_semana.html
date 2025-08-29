@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cuadrante – Septiembre 2025</title>
+<style>
+:root {
+  --bg: #f6f8fb; --card:#ffffff; --text:#222; --muted:#6b7280;
+  --brand:#2563eb; --ok:#10b981; --warn:#f59e0b; --danger:#ef4444;
+  --border:#e5e7eb; --sticky:#f3f6fb;
+}
+* { box-sizing: border-box; }
+html,body { margin:0; padding:0; background:var(--bg); color:var(--text); font-family: Calibri, Arial, system-ui; }
+.container { max-width: 1400px; margin: 24px auto; padding: 0 16px; }
+.header { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:12px; }
+h1 { margin:0; font-size: 22px; }
+.badge { padding:6px 10px; border-radius: 999px; font-size: 12px; background:#eef2ff; color:#1e40af; border:1px solid var(--border); }
+.card { background: var(--card); border:1px solid var(--border); border-radius: 12px; padding: 12px; box-shadow: 0 4px 16px rgba(0,0,0,.04); }
+.table-wrap { overflow: auto; max-height: 70vh; }
+table { border-collapse: collapse; width: 100%; }
+th, td { border: 1px solid var(--border); padding: 6px 8px; text-align: center; }
+th.sticky { position: sticky; top: 0; background: var(--sticky); z-index: 2; }
+td.name, th.name { text-align: left; min-width: 240px; position: sticky; left: 0; background: #fff; z-index: 3; }
+td.turno { min-width: 34px; }
+.legend { margin-top: 16px; display:grid; grid-template-columns: repeat(4, minmax(240px,1fr)); gap:8px; }
+.legend .item { display:flex; align-items:center; gap:8px; }
+.legend .swatch { width:16px; height:16px; border-radius:4px; border:1px solid #ccc; }
+.footer { margin-top: 16px; font-size: 13px; color: var(--muted); line-height: 1.4; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>Cuadrante – Septiembre 2025</h1>
+    <span class="badge">Solo lectura por defecto</span>
+  </div>
+
+  <div class="card">
+    <div class="table-wrap">
+      <table id="tabla">
+        <thead id="thead"></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="legend" id="legend"></div>
+  </div>
+</div>
+
+<script>
+const data = {"employees": [], "month": 9, "year": 2025, "turnoColores": {}, "turnoInfo": {}};
+const PASSWORD = "Urbaser123";
+
+function diasEnMes(m, y) { return new Date(y, m, 0).getDate(); }
+
+let empleados = data.employees;
+let mes = data.month;
+let anio = data.year;
+let editable = false;
+
+const thead = document.getElementById('thead');
+const tbody = document.getElementById('tbody');
+
+function render() {
+  const dcount = diasEnMes(mes, anio);
+  thead.innerHTML = '';
+
+  // Fila 1: números
+  const tr1 = document.createElement('tr');
+  const thName = document.createElement('th');
+  thName.textContent = 'Nombre y Apellidos';
+  thName.className = 'name sticky';
+  thName.rowSpan = 2;
+  tr1.appendChild(thName);
+  for (let d=1; d<=dcount; d++) {
+    const th = document.createElement('th');
+    th.textContent = d;
+    th.className='sticky';
+    tr1.appendChild(th);
+  }
+  thead.appendChild(tr1);
+
+  // Fila 2: días semana
+  const tr2 = document.createElement('tr');
+  const diasSemana = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
+  for (let d=1; d<=dcount; d++) {
+    const th = document.createElement('th');
+    const fecha = new Date(anio, mes-1, d);
+    th.textContent = diasSemana[fecha.getDay()];
+    th.className='sticky';
+    tr2.appendChild(th);
+  }
+  thead.appendChild(tr2);
+}
+render();
+</script>
+</body>
+</html>
