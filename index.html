@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cuadrante – Septiembre 2025</title>
+<style>
+:root {
+  --bg: #f6f8fb; --card:#ffffff; --text:#222; --muted:#6b7280;
+  --brand:#2563eb; --ok:#10b981; --warn:#f59e0b; --danger:#ef4444;
+  --border:#e5e7eb; --sticky:#f3f6fb;
+}
+* { box-sizing: border-box; }
+html,body { margin:0; padding:0; background:var(--bg); color:var(--text); font-family: Calibri, Arial, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
+.container { max-width: 1400px; margin: 24px auto; padding: 0 16px; }
+.header { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:12px; }
+h1 { margin:0; font-size: 22px; }
+.badge { padding:6px 10px; border-radius: 999px; font-size: 12px; background:#eef2ff; color:#1e40af; border:1px solid var(--border); }
+.controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+button, select, input { padding:8px 10px; border-radius: 8px; border:1px solid var(--border); background:#fff; }
+button.primary { background: var(--brand); color:#fff; border-color: transparent; }
+.notice { font-size:13px; color:var(--muted); margin-top:6px; }
+.card { background: var(--card); border:1px solid var(--border); border-radius: 12px; padding: 12px; box-shadow: 0 4px 16px rgba(0,0,0,.04); }
+.table-wrap { overflow: auto; max-height: 70vh; }
+table { border-collapse: collapse; width: 100%; }
+th, td { border: 1px solid var(--border); padding: 6px 8px; text-align: center; }
+th.sticky { position: sticky; top: 0; background: var(--sticky); z-index: 2; }
+td.name, th.name { text-align: left; min-width: 240px; position: sticky; left: 0; background: #fff; z-index: 3; }
+td.turno { min-width: 34px; }
+.legend { margin-top: 16px; display:grid; grid-template-columns: repeat(4, minmax(240px,1fr)); gap:8px; }
+.legend .item { display:flex; align-items:center; gap:8px; }
+.legend .swatch { width:16px; height:16px; border-radius:4px; border:1px solid #ccc; }
+.footer { margin-top: 16px; font-size: 13px; color: var(--muted); line-height: 1.4; }
+hr { border:0; height:1px; background:var(--border); margin: 14px 0; }
+.topbar { display:flex; align-items:center; gap:10px; margin: 8px 0; }
+.topbar .state { font-weight:600; }
+.topbar .state.readonly { color: var(--danger); }
+.topbar .state.edit { color: var(--ok); }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>Cuadrante – Septiembre 2025</h1>
+    <span class="badge">Solo lectura por defecto</span>
+  </div>
+
+  <div class="card">
+    <div class="topbar">
+      <span id="mode" class="state readonly">🔒 Modo lectura – Inicia sesión como administrador para editar</span>
+      <div style="margin-left:auto; display:flex; gap:8px;">
+        <button id="btnAdmin" class="primary">Entrar como administrador</button>
+        <button id="btnExport">Exportar CSV</button>
+        <label>Mes:
+          <select id="mes">
+            <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
+            <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
+            <option value="7">Julio</option><option value="8">Agosto</option><option value="9" selected>Septiembre</option>
+            <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+          </select>
+        </label>
+        <label>Año: <input id="anio" type="number" value="2025" min="2000" max="2100" style="width:92px;" /></label>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table id="tabla">
+        <thead id="thead"></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="legend" id="legend"></div>
+    <hr/>
+    <div class="footer">
+      <strong>📖 Cómo usar este cuadrante</strong><br/>
+      • <em>Modo administrador</em>: pulsa <strong>“Entrar como administrador”</strong> e introduce la contraseña para habilitar la edición.<br/>
+      • <em>Edición</em>: haz doble clic en una celda y escribe el código del turno (M, M1… M8, V, PR, BM, BE, CV, FL, FN, C).<br/>
+      • <em>Colores</em>: se aplican automáticamente según el código introducido.<br/>
+      • <em>Exportar</em>: usa el botón <strong>Exportar CSV</strong> para descargar los datos visibles.<br/>
+      • <em>Días del mes</em>: cambia Mes/Año para ajustar automáticamente el número de columnas de días.<br/>
+    </div>
+  </div>
+</div>
+
+<script>
+// === Datos incrustados desde Excel ===
+const data = {"month": 9, "year": 2025, "employees": [{"name": "Juan Pablo", "days": ["", "M", "M", "M", "M", "M", "", "", "M", "M7", "M7", "M7", "M4", "", "", "M", "M2", "M2", "M2", "M2", "", "", "M", "M", "M", "M", "M", "", "", "M"]}, {"name": "Carmelo", "days": ["", "M7", "M7", "M7", "M7", "M4", "", "", "V", "M", "M", "M", "M", "", "", "V", "M", "M", "M", "M", "", "", "V", "M6", "M6", "M6", "M3", "", "", "V"]}, {"name": "Victor", "days": ["", "M5", "M5", "M5", "M5", "M2", "", "", "M7", "M5", "M5", "M5", "M2", "", "", "M5", "M5", "M5", "M5", "M2", "", "", "M7", "M7", "M7", "M7", "M4", "", "", "M6"]}, {"name": "Jacsell", "days": ["", "M5", "M5", "M5", "M5", "M2", "", "", "M6", "M5", "M5", "M5", "M2", "", "", "M5", "M5", "M5", "M5", "M2", "", "", "M6", "V", "V", "V", "V", "", "", "V"]}, {"name": "Agustina Nahir", "days": ["", "M2", "M2", "M2", "M2", "M2", "", "", "M5", "M5", "M5", "M5", "M2", "", "", "M7", "M7", "M7", "M7", "M4", "", "", "M2", "M2", "M2", "M2", "M2", "", "", "M7"]}, {"name": "Hector", "days": ["", "BM", "BM", "BM", "BM", "BM", "", "", "BM", "BM", "BM", "BM", "BM", "", "", "BM", "BM", "BM", "BM", "BM", "", "", "BM", "BM", "BM", "BM", "BM", "", "", "BM"]}, {"name": "* Los horarios pueden variar según necesidades del Servicio.", "days": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "Turnos URBASER", "days": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "M", "days": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "M1", "days": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "M2", "days": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "M3", "days": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "M4", "days": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "M5", "days": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "M6", "days": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "M7", "days": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "M8", "days": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "PR", "days": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "C", "days": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "FL", "days": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "FN", "days": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "V", "days": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "BE", "days": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "BM", "days": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}, {"name": "CV", "days": ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]}], "turnoInfo": {"M": {"horas": "8H", "horario": "07:30 a 15:30"}, "M1": {"horas": "9H", "horario": "07:30 a 16:30"}, "M2": {"horas": "8H", "horario": "08:00 a 16:00"}, "M3": {"horas": "8H", "horario": "09:00 a 17:00"}, "M4": {"horas": "8H", "horario": "10:00 a 18:00"}, "M5": {"horas": "9H", "horario": "08:00 a 17:00"}, "M6": {"horas": "9H", "horario": "09:00 a 18:00"}, "M7": {"horas": "9H", "horario": "10:00 a 19:00"}, "M8": {"horas": "7H", "horario": "08:00 a 15:00"}, "PR": {"horas": "", "horario": "Permiso retribuido"}, "C": {"horas": "", "horario": "Días compensado"}, "FL": {"horas": "", "horario": "Festivo Local"}, "FN": {"horas": "", "horario": "Festivo Nacional"}, "V": {"horas": "", "horario": "Vacaciones"}, "BE": {"horas": "", "horario": "Baja de Empresa"}, "BM": {"horas": "", "horario": "Baja Médica"}, "CV": {"horas": "", "horario": "Pendiente confirmar vacaciones"}}, "turnoColores": {"M": "3498DB", "M1": "27AE60", "M2": "8E44AD", "M3": "E67E22", "M4": "E74C3C", "M5": "F1C40F", "M6": "2C3E50", "M7": "A04000", "M8": "9B59B6", "V": "00FF00", "PR": "FF69B4", "BM": "7F8C8D", "BE": "D35400", "CV": "1ABC9C", "FL": "FFD700", "FN": "C0392B", "C": "FFFFFF"}};
+
+// === Configuración ===
+const PASSWORD = "Urbaser123";
+
+function nombreMes(m) {
+  return ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"][m-1];
+}
+function diasEnMes(m, y) { return new Date(y, m, 0).getDate(); }
+
+let turnoColores = data.turnoColores;
+let turnoInfo = data.turnoInfo;
+let empleados = JSON.parse(JSON.stringify(data.employees));
+let mes = data.month;
+let anio = data.year;
+let editable = false;
+
+const thead = document.getElementById('thead');
+const tbody = document.getElementById('tbody');
+const selMes = document.getElementById('mes');
+const inpAnio = document.getElementById('anio');
+const legend = document.getElementById('legend');
+const mode = document.getElementById('mode');
+const btnAdmin = document.getElementById('btnAdmin');
+
+selMes.value = String(mes);
+inpAnio.value = String(anio);
+
+function setEditable(on) {
+  editable = !!on;
+  mode.textContent = on ? "✅ Modo edición habilitado" : "🔒 Modo lectura – Inicia sesión como administrador para editar";
+  mode.className = "state " + (on ? "edit" : "readonly");
+  // Alternar contentEditable en celdas
+  [...tbody.querySelectorAll('td.turno')].forEach(td => td.contentEditable = on);
+}
+
+btnAdmin.addEventListener('click', () => {
+  const p = prompt("Introduce la contraseña de administrador:");
+  if (p === PASSWORD) setEditable(true);
+  else alert("Contraseña incorrecta.");
+});
+
+function pintarLegend() {
+  legend.innerHTML = '';
+  const order = ["M","M1","M2","M3","M4","M5","M6","M7","M8","V","PR","BM","BE","CV","FL","FN","C"];
+  order.forEach(code => {
+    if (!turnoInfo[code]) return;
+    const div = document.createElement('div');
+    div.className='item';
+    const sw = document.createElement('div');
+    sw.className='swatch';
+    sw.style.background = '#' + (turnoColores[code] || 'FFFFFF');
+    const txt = document.createElement('span');
+    const info = turnoInfo[code];
+    const detalle = info.horas ? ` (${info.horas} – ${info.horario})` : ` (${info.horario})`;
+    txt.textContent = `${code}${detalle}`;
+    div.appendChild(sw); div.appendChild(txt);
+    legend.appendChild(div);
+  });
+}
+
+function render() {
+  const dcount = diasEnMes(mes, anio);
+  thead.innerHTML = '';
+  const tr = document.createElement('tr');
+  const thName = document.createElement('th');
+  thName.textContent = 'Nombre y Apellidos';
+  thName.className = 'name sticky';
+  tr.appendChild(thName);
+  for (let d=1; d<=dcount; d++) {
+    const th = document.createElement('th');
+    th.textContent = d;
+    th.className='sticky';
+    tr.appendChild(th);
+  }
+  thead.appendChild(tr);
+
+  tbody.innerHTML = '';
+  empleados.forEach(emp => {
+    const trb = document.createElement('tr');
+    const tdName = document.createElement('td');
+    tdName.textContent = emp.name || '';
+    tdName.className='name';
+    trb.appendChild(tdName);
+    for (let d=0; d<dcount; d++) {
+      const td = document.createElement('td');
+      td.className = 'turno';
+      const val = (emp.days && emp.days[d]) ? String(emp.days[d]).toUpperCase() : '';
+      td.textContent = val;
+      if (turnoColores[val]) td.style.background = '#' + turnoColores[val];
+      if (editable) td.contentEditable = true;
+      td.addEventListener('input', () => {
+        if (!editable) return;
+        const v = td.textContent.trim().toUpperCase();
+        if (turnoColores[v]) td.style.background = '#' + turnoColores[v];
+        else td.style.background = '';
+      });
+      trb.appendChild(td);
+    }
+    tbody.appendChild(trb);
+  });
+  pintarLegend();
+  setEditable(false); // asegurar modo lectura tras re-render
+}
+
+document.getElementById('btnExport').addEventListener('click', () => {
+  const dcount = diasEnMes(mes, anio);
+  let csv = 'Nombre';
+  for (let d=1; d<=dcount; d++) csv += ';' + d;
+  csv += '\n';
+  [...tbody.rows].forEach((row, idx) => {
+    const emp = empleados[idx];
+    csv += (emp && emp.name) ? emp.name : '';
+    for (let d=0; d<dcount; d++) {
+      const cell = row.cells[d+1];
+      csv += ';' + (cell ? cell.textContent.trim() : '');
+    }
+    csv += '\n';
+  });
+  const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `cuadrante_${anio}_${mes}.csv`;
+  a.click();
+});
+
+selMes.addEventListener('change', () => { mes = parseInt(selMes.value,10); render(); });
+inpAnio.addEventListener('change', () => { anio = parseInt(inpAnio.value,10)||anio; render(); });
+
+render();
+</script>
+</body>
+</html>
