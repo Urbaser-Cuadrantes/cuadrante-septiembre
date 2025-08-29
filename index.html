@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Cuadrante – Septiembre 2025</title>
+<style>
+body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+h2 { text-align: center; }
+table { border-collapse: collapse; width: 100%; background: white; }
+th, td { border: 1px solid #ccc; text-align: center; padding: 5px; }
+th { background: #eee; }
+.legend { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 10px; }
+.legend-item { display: flex; align-items: center; gap: 5px; font-size: 14px; }
+.color-box { width: 20px; height: 20px; border: 1px solid #333; }
+.admin { margin: 10px 0; text-align: right; }
+button { padding: 5px 10px; margin-left: 5px; }
+</style>
+</head>
+<body>
+<h2>Cuadrante – Septiembre 2025</h2>
+<div class="admin">
+  <button onclick="login()">Entrar como administrador</button>
+  <button onclick="exportarCSV()">Exportar CSV</button>
+</div>
+<table id="cuadrante"></table>
+<p><i>* Los horarios pueden variar según necesidades del Servicio.</i></p>
+<div class="legend" id="leyenda"></div>
+
+<script>
+const empleados = [{'name': 'Juan Pablo Rueda Romero', 'turns': ['M', 'M', 'M', 'M', 'M', '', '', 'M', 'M7', 'M7', 'M7', 'M4', '', '', 'M', 'M2', 'M2', 'M2', 'M2', '', '', 'M', 'M', 'M', 'M', 'M', '', '', 'M', 'M']}, {'name': 'Carmelo Perez', 'turns': ['M7', 'M7', 'M7', 'M7', 'M4', '', '', 'V', 'M', 'M', 'M', 'M', '', '', 'V', 'M', 'M', 'M', 'M', '', '', 'V', 'M6', 'M6', 'M6', 'M3', '', '', 'V', 'M7']}, {'name': 'Victor Garcia', 'turns': ['M5', 'M5', 'M5', 'M5', 'M2', '', '', 'M7', 'M5', 'M5', 'M5', 'M2', '', '', 'M5', 'M5', 'M5', 'M5', 'M2', '', '', 'M7', 'M7', 'M7', 'M7', 'M4', '', '', 'M6', 'M6']}, {'name': 'Jacsell Saldiña', 'turns': ['M5', 'M5', 'M5', 'M5', 'M2', '', '', 'M6', 'M5', 'M5', 'M5', 'M2', '', '', 'M5', 'M5', 'M5', 'M5', 'M2', '', '', 'M6', 'V', 'V', 'V', 'V', '', '', 'V', 'M5']}, {'name': 'Agustina Nahir Faria', 'turns': ['M2', 'M2', 'M2', 'M2', 'M2', '', '', 'M5', 'M5', 'M5', 'M5', 'M2', '', '', 'M7', 'M7', 'M7', 'M7', 'M4', '', '', 'M2', 'M2', 'M2', 'M2', 'M2', '', '', 'M7', 'M2']}, {'name': 'Hector Salguero', 'turns': ['BM', 'BM', 'BM', 'BM', 'BM', '', '', 'BM', 'BM', 'BM', 'BM', 'BM', '', '', 'BM', 'BM', 'BM', 'BM', 'BM', '', '', 'BM', 'BM', 'BM', 'BM', 'BM', '', '', 'BM', 'BM']}, {'name': '* Los horarios pueden variar según necesidades del Servicio.', 'turns': ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']}];
+const turnoColores = {'M': '#FFD700', 'M1': '#FFC107', 'M2': '#FFF176', 'M3': '#FF9800', 'M4': '#FF5722', 'M5': '#FFB74D', 'M6': '#F57C00', 'M7': '#E64A19', 'M8': '#90CAF9', 'PR': '#AED581', 'C': '#CDDC39', 'FL': '#00BCD4', 'FN': '#009688', 'V': '#4CAF50', 'BE': '#795548', 'BM': '#9C27B0', 'CV': '#607D8B'};
+const turnoInfo = {'M': 'M = 8H – 07:30 a 15:30', 'M1': 'M1 = 9H – 07:30 a 16:30', 'M2': 'M2 = 8H – 08:00 a 16:00', 'M3': 'M3 = 8H – 09:00 a 17:00', 'M4': 'M4 = 8H – 10:00 a 18:00', 'M5': 'M5 = 9H – 08:00 a 17:00', 'M6': 'M6 = 9H – 09:00 a 18:00', 'M7': 'M7 = 9H – 10:00 a 19:00', 'M8': 'M8 = 7H – 08:00 a 15:00', 'PR': 'Permiso retribuido', 'C': 'Día compensado', 'FL': 'Festivo Local', 'FN': 'Festivo Nacional', 'V': 'Vacaciones', 'BE': 'Baja de Empresa', 'BM': 'Baja Médica', 'CV': 'Pendiente confirmar vacaciones'};
+
+function generarTabla(){
+  const tabla = document.getElementById("cuadrante");
+  tabla.innerHTML = "";
+  const diasSemana = ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"];
+  const tr1 = document.createElement("tr");
+  const tr2 = document.createElement("tr");
+  let th = document.createElement("th"); th.rowSpan = 2; th.textContent = "Nombre y Apellidos"; tr1.appendChild(th);
+  for (let d = 1; d <= 30; d++) {
+    let th1 = document.createElement("th"); th1.textContent = d; tr1.appendChild(th1);
+    let th2 = document.createElement("th");
+    th2.textContent = diasSemana[(d-1)%7]; // Día 1 = Lunes
+    tr2.appendChild(th2);
+  }
+  tabla.appendChild(tr1); tabla.appendChild(tr2);
+
+  empleados.forEach(emp => {
+    const tr = document.createElement("tr");
+    let td = document.createElement("td"); td.textContent = emp.name; tr.appendChild(td);
+    for (let d = 0; d < 30; d++) {
+      let td = document.createElement("td");
+      let code = emp.turns[d] || "";
+      if (code) {
+        td.textContent = code;
+        td.style.background = turnoColores[code] || "";
+        td.title = turnoInfo[code] || "";
+      }
+      tr.appendChild(td);
+    }
+    tabla.appendChild(tr);
+  });
+}
+
+function renderLeyenda(){
+  const leyenda = document.getElementById("leyenda");
+  leyenda.innerHTML = "";
+  for (const [code, desc] of Object.entries(turnoInfo)) {
+    const div = document.createElement("div"); div.className = "legend-item";
+    const box = document.createElement("div"); box.className = "color-box"; box.style.background = turnoColores[code] || "";
+    div.appendChild(box); div.appendChild(document.createTextNode(desc));
+    leyenda.appendChild(div);
+  }
+}
+
+function exportarCSV(){
+  let csv = "Nombre;"; for (let d=1; d<=30; d++) csv += d + ";"; csv += "\n";
+  empleados.forEach(emp => { csv += emp.name + ";" + emp.turns.join(";") + ";\n"; });
+  const blob = new Blob([csv], {type:"text/csv"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a"); a.href = url; a.download = "cuadrante_sep2025.csv"; a.click();
+}
+
+function login(){
+  const pass = prompt("Introduce la contraseña:");
+  if (pass === "Urbaser123") alert("Modo edición activado");
+  else alert("Contraseña incorrecta");
+}
+
+generarTabla();
+renderLeyenda();
+</script>
+</body>
+</html>
